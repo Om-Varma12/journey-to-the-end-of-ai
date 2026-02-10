@@ -55,20 +55,18 @@ Real-world projects built across phases to demonstrate applied AI engineering ca
 ---
 
 ## 📁 Repo Structure
-
 journey-to-the-end-of-ai/
-│
-├── phase-1-sequence-models/
-├── phase-2-transformers/
-├── phase-3-genai-foundations/
-├── phase-4-vector-db/
-├── phase-5-rag/
-├── phase-6-langchain/
-├── phase-8-langgraph/
-├── phase-9-advanced-systems/
-├── phase-10-mcp/
-├── phase-11-portfolio/
-
+  ├── phase-1-sequence-models/
+  ├── phase-2-transformers/
+  ├── phase-3-genai-foundations/
+  ├── phase-4-vector-db/
+  ├── phase-5-rag/
+  ├── phase-6-langchain/
+  ├── phase-8-langgraph/
+  ├── phase-9-advanced-systems/
+  ├── phase-10-mcp/
+  └── phase-11-portfolio/
+  
 Each phase contains:
 - notes  
 - experiments  
