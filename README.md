@@ -43,10 +43,6 @@ Connecting models to external tools, IDEs, and automation pipelines through stan
 
 ### Phase 11 — Portfolio Projects  
 Real-world projects built across phases to demonstrate applied AI engineering capability.
-
-## 🔵 Phase 11 — Portfolio Projects
-Built in parallel.
-
 **Projects**
 - Review scraper  
 - Supabase + Streamlit app  
