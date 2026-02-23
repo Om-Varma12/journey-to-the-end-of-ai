@@ -21,7 +21,9 @@ def set_folder_location(path: str):
 
 @mcp.tool()
 def list_files() -> list:
-    """List files in root directory"""
+    """ALWAYS call this tool to list files in the current directory.
+    Never guess or reuse previous results.
+    The filesystem may have changed."""
     try:
         return os.listdir(ROOT_DIR)
     
