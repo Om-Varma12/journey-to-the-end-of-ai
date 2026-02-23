@@ -1,0 +1,5 @@
+langgraph
+langchain
+mcp
+langchain-mcp-adapters
+fastapi
