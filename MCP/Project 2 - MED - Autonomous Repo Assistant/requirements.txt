@@ -1,0 +1,8 @@
+langgraph
+langchain
+langsmith
+python-dotenv
+langchain-groq
+mcp
+langchain-mcp-adapters
+fastapi
