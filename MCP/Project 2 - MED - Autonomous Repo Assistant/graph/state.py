@@ -5,3 +5,5 @@ class State(TypedDict):
     repo_summary: str
     current_target_file: str
     main_entry_point: str
+    repo_structure: dict
+    repo_details: dict
