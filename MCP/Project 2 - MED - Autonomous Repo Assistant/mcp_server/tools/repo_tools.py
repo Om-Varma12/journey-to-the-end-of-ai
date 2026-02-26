@@ -109,11 +109,12 @@ def register_repo_tools(mcp):
 
             current[parts[-1]] = {}
 
+        print("CLONE TOOL EXECUTED")
         return {
             "repo_path": repo_path,
             "repo_structure": file_map
         }
-        
+    # clone_repo("Om-Varma12", "CrackEM")
 
     @mcp.tool()
     def get_repo_information(username: str, repo_name: str) -> dict:
@@ -163,3 +164,6 @@ def register_repo_tools(mcp):
             "created_at": info['created_at'],
             "lasted_updated_at": info['updated_at']
         }
+        
+# mcp = FastMCP()
+# register_repo_tools(mcp)

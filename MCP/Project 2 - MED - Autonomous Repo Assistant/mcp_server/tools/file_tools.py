@@ -38,8 +38,7 @@ def register_file_tools(mcp):
             - Should not be used for large binaries.
             - Core tool for repo-analysis agents to read source files.
         """
-        BASE_DIR = "repos/" + repo_name
-        final_path = os.path.join(BASE_DIR, file_path)
+        final_path = "repos/" + repo_name + "/" + file_path
         with open(final_path, "r") as f:
             content = f.read()
         
