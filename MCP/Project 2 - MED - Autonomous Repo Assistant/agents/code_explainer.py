@@ -15,7 +15,7 @@ client = MultiServerMCPClient({
 })
 
 
-async def run(question, file_path, repo_summary):
+async def run(question, file_path, repo_summary, repo_name):
     prompt = f"""
         You are a senior level code explainer who has only one task that it to retrieve the file from tool and 
         properly explain what the code does without consuming too much tokens and keeping the explaination
@@ -23,6 +23,7 @@ async def run(question, file_path, repo_summary):
         Question: {question}
         File_Path: {file_path}
         Complete Repository Summary: {repo_summary}
+        Repository Name: {repo_name}
         
         Give shortest explaination of what the file does.
         Remove all kinds of formating, just returning everything in text format.
@@ -30,10 +31,10 @@ async def run(question, file_path, repo_summary):
 
     tools = await client.get_tools()
     
-    print("Got tools")
+    # print("Got tools")
     
     model_with_tools = llm.bind_tools(tools)
-    print("connected")
+    # print("connected")
     
     response = await model_with_tools.ainvoke(prompt)
     
@@ -57,11 +58,13 @@ async def run(question, file_path, repo_summary):
             }
         ])
 
-        print(final_response.content)
+        # print(final_response.content)
+        return final_response.content
     else:
-        print(response.content)
+        # print(response.content)
+        return response.content
         
-    print("retrieved")
-    print("DONE")
+    # print("retrieved")
+    # print("DONE")
     
-asyncio.run(run("What does followupAgent.py file does?", "ai/agents/followupAgent.py", "This is an AI powered interview taking system named as CrackEM."))
+print(asyncio.run(run("What does followupAgent.py file does?", "ai/agents/followupAgent.py", "This is an AI powered interview taking system named as CrackEM.")))
