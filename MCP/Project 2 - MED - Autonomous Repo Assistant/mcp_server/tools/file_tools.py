@@ -2,7 +2,7 @@ from mcp.server.fastmcp import FastMCP
 import os
 
 def register_file_tools(mcp):
-    print("File Tools Online")
+    # print("File Tools Online")
     @mcp.tool()
     def get_file(repo_name: str, file_path: str) -> str:
         """
