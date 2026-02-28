@@ -10,10 +10,11 @@ with open('prompts/router.txt') as f:
 async def _run(user_query: str):
     prompt = PROMPT.replace('{user_query}', user_query)
     response = await llm.ainvoke(prompt)
+    print(response)
     return response.content
 
-# async def run(user_query):
-#     return await _run(user_query)
+async def run(user_query):
+    return await _run(user_query)
 
-if __name__ == "__main__":
-    print(asyncio.run(_run("What does this repo do?")))
+# if __name__ == "__main__":
+#     print(asyncio.run(_run("What does this repo do?")))

@@ -3,7 +3,6 @@ from langchain_groq import ChatGroq
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_core.messages import ToolMessage, HumanMessage
 from dotenv import load_dotenv
-
 load_dotenv()
 
 llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0)
@@ -19,13 +18,15 @@ client = MultiServerMCPClient({
 with open('prompts/analyzer.txt', 'r') as f:
     PROMPT = f.read()
 
-async def _run(question, username, repo_name, repoPath: str | None, repoStructure: dict | None):
+async def _run(question, username, repo_name, repoStructure: dict | None = None):
     prompt = (
         PROMPT
         .replace("{user_query}", question)
         .replace("{username}", username)
         .replace("{repo_name}", repo_name)
     )
+    if(repoStructure != None):
+        prompt += "\nRepo Structure: \n" + str(repoStructure)
 
     tools = await client.get_tools()
 
@@ -36,7 +37,9 @@ async def _run(question, username, repo_name, repoPath: str | None, repoStructur
 
     while True:
         response = await model_with_tools.ainvoke(messages)
-
+        print(response)
+        print()
+        print()
         # If no tool calls → final answer
         if not response.tool_calls:
             print(response.content)
@@ -68,8 +71,8 @@ async def _run(question, username, repo_name, repoPath: str | None, repoStructur
                 )
             )
 
-# async def run(user_query, username, repo_name, repoPath, rpeoStructure):
-#     return await _run(user_query, username, repo_name)
+async def run(user_query, username, repo_name, repoStructure):
+    return await _run(user_query, username, repo_name, repoStructure)
 
-if __name__ == "__main__":
-    print(asyncio.run(_run("What does this repo do?", "Om-Varma12", "PaperForge")))
+# if __name__ == "__main__":
+#     print(asyncio.run(_run("What does this repo do?", "Om-Varma12", "PaperForge")))
