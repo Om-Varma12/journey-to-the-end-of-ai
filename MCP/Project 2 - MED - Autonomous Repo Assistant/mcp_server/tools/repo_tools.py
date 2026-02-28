@@ -161,3 +161,37 @@ def register_repo_tools(mcp):
         else:
             return False
     
+    
+    @mcp.tool()
+    def get_repo_details(username: str, repo_name: str):
+        """
+        Fetch metadata of a public GitHub repository.
+
+        This tool retrieves basic information about a repository
+        from the GitHub REST API using the provided username and
+        repository name.
+
+        Args:
+            username (str): GitHub username or organization name.
+            repo_name (str): Name of the repository.
+
+        Returns:
+            dict: A dictionary containing:
+                - description (str | None): Repository description.
+                - language (str | None): Primary programming language.
+                - stars (int): Number of stargazers.
+                - forks (int): Number of forks.
+                - url (str): Repository HTML URL.
+
+        Use this tool when:
+            - The user asks what a repository is about.
+            - Basic repository metadata is needed before deeper analysis.
+            - The router selects repo_analyzer for high-level overview.
+        """
+        url = f'https://api.github.com/repos/{username}/{repo_name}'
+        response = requests.get(url)
+        data = response.json()
+        return {
+            'repo_description': data['description'],
+            'repo_language': data['language']
+        }
