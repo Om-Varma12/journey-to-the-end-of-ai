@@ -9,61 +9,73 @@ from pprint import pprint
 BASE_DIR = "repos"
 
 def register_repo_tools(mcp):
-    print("Repo Tools Online")
+    # print("Repo Tools Online")
+    @mcp.tool()
+    def check_repo_exist(repo_name: str) -> bool:
+        """
+        Check whether a repository is already cloned locally.
+
+        Args:
+            repo_name (str): Name of the repository directory inside the BASE_DIR.
+
+        Returns:
+            bool: 
+                - True if the repository folder exists locally.
+                - False if the repository is not found.
+
+        Notes:
+            - This function only checks for directory existence.
+            - It does NOT verify whether the directory is a valid git repository.
+            - No network or git operations are performed.
+        """
+        repo_path = BASE_DIR + '/' + repo_name
+        return True if(os.path.exists(repo_path)) else False
+    
+    
     @mcp.tool()
     def clone_repo(username: str, repo_name: str) -> dict:
         """
-        Clone a GitHub repository locally or pull the latest changes if it already exists.
-
-        This tool ensures a local copy of the repository is available inside the `repos/`
-        directory. If the repository has already been cloned earlier, it will perform
-        a `git pull` to fetch the latest updates instead of cloning again.
-
-        After cloning/pulling, the tool scans the repository and returns a structured
-        overview of its contents for downstream agents to analyze.
+        Clone a GitHub repository locally and generate a structured file map.
 
         Args:
-            username (str):
-                GitHub username or organization name.
-
-            repo_name (str):
-                Name of the repository to clone.
+            username (str): GitHub username or organization name.
+            repo_name (str): Name of the GitHub repository.
 
         Returns:
-            dict:
-                {
-                    "repo_path": str,        # local filesystem path of the repo
-                    "repo_structure": {
-                        "tree": dict,        # nested folder structure
-                        "all_files": list,   # flat list of all files
-                        "by_extension": dict,# files grouped by extension
-                        "important_files": list # detected entry files
-                    }
-                }
+            dict: A dictionary containing:
+                - "repo_path" (str): Local filesystem path where the repo was cloned.
+                - "repo_structure" (dict):
+                    - "tree": Nested dictionary representing folder structure.
+                    - "all_files": List of all relevant file paths (relative).
+                    - "by_extension": Dictionary grouping files by file extension.
+                    - "important_files": List of key entry-point files detected 
+                    (e.g., main.py, app.py, README.md, package.json, etc.).
 
-        Notes:
-            - Skips heavy/unnecessary folders like: node_modules, .git, dist, build.
-            - Skips binary assets like images and lock files.
-            - Designed to be idempotent for agent workflows.
-            - Safe to call repeatedly in a multi-agent system.
+        Behavior:
+            - Clones the repository using `git clone`.
+            - Skips irrelevant directories:
+                node_modules, .git, __pycache__, dist, build, __init__.py
+            - Skips binary/irrelevant file types:
+                .lock, .png, .jpg, .svg, .pack
+            - Builds a structured representation for intelligent repo analysis.
+
+        Raises:
+            subprocess.CalledProcessError:
+                If git clone fails (invalid repo, network issue, etc.).
+
+        Side Effects:
+            - Creates BASE_DIR if it does not exist.
+            - Downloads repository contents to local filesystem.
         """
         os.makedirs(BASE_DIR, exist_ok=True)
         
         clone_url = f"https://github.com/{username}/{repo_name}.git"
-        repo_path = os.path.join(BASE_DIR, repo_name)
-
-        if os.path.exists(repo_path):
-            print("Repo already cloned. Pulling latest changes...")
-            subprocess.run(
-                ["git", "-C", repo_path, "pull"],
-                check=True
-            )
-        else:
-            print("Cloning repo...")
-            subprocess.run(
-                ["git", "clone", clone_url, repo_path],
-                check=True
-            )
+        repo_path = BASE_DIR + '/' + repo_name
+        
+        subprocess.run(
+            ["git", "clone", clone_url, repo_path],
+            check=True
+        )
 
         root_path = Path(repo_path) 
 
@@ -109,61 +121,43 @@ def register_repo_tools(mcp):
 
             current[parts[-1]] = {}
 
-        print("CLONE TOOL EXECUTED")
         return {
             "repo_path": repo_path,
             "repo_structure": file_map
         }
-    # clone_repo("Om-Varma12", "CrackEM")
-
+        
     @mcp.tool()
-    def get_repo_information(username: str, repo_name: str) -> dict:
+    def pull_latest_changes(repo_name: str) -> bool:
         """
-        Fetch basic metadata about a GitHub repository using the GitHub REST API.
-
-        This tool retrieves high-level repository information such as description,
-        primary language, creation date, and last update time. It does NOT clone
-        the repository — it only queries GitHub's API.
-
-        Useful for agents that need quick context before deciding whether to clone
-        or analyze the repository.
+        Pull the latest changes from the remote repository.
 
         Args:
-            username (str):
-                GitHub username or organization name.
-
-            repo_name (str):
-                Repository name.
+            repo_name (str): Name of the locally cloned repository.
 
         Returns:
-            dict:
-                {
-                    "description": str | None,
-                    "language": str | None,
-                    "created_at": str,          # ISO timestamp
-                    "lasted_updated_at": str    # ISO timestamp
-                }
+            bool:
+                - True if the repository exists and pull was successful.
+                - False if the repository directory does not exist.
+
+        Behavior:
+            - Executes `git pull` inside the repository directory.
+            - Does not handle merge conflicts explicitly.
+            - Assumes the repository has a valid remote origin.
 
         Raises:
-            requests.HTTPError:
-                If the repository does not exist or API rate limits are hit.
+            subprocess.CalledProcessError:
+                If git pull fails due to network issues or git errors.
 
-        Notes:
-            - Uses GitHub public API (no auth).
-            - Rate limit: ~60 requests/hour without token.
-            - Can be extended to include stars, forks, topics, etc.
+        Side Effects:
+            - Updates local repository files.
         """
-        
-        response = requests.get(f"https://api.github.com/repos/{username}/{repo_name}")
-        info = response.json()
-        
-
-        return {
-            "description": info['description'],
-            "language": info['language'],
-            "created_at": info['created_at'],
-            "lasted_updated_at": info['updated_at']
-        }
-        
-# mcp = FastMCP()
-# register_repo_tools(mcp)
+        repo_path = BASE_DIR + '/' + repo_name
+        if(os.path.exists(repo_path)):
+            subprocess.run(
+                ["git", "-C", repo_path, "pull"],
+                check=True
+            )
+            return True
+        else:
+            return False
+    
