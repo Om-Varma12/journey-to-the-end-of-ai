@@ -10,7 +10,7 @@ with open('prompts/router.txt') as f:
 async def _run(user_query: str):
     prompt = PROMPT.replace('{user_query}', user_query)
     response = await llm.ainvoke(prompt)
-    print(response)
+    # print(response)
     return response.content
 
 async def run(user_query):
