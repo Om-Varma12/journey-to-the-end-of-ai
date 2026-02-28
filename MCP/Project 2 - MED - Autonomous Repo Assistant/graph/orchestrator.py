@@ -1,40 +1,11 @@
 from langgraph.graph import StateGraph, END
 from .state import State
-from .nodes import analyze_repo_node, explain_code_node
-from langchain_groq import ChatGroq
+from .nodes import analyze_repo_node, explain_code_node, router_node
+from services.repo_service import check_repo_exist, clone_repo, pull_latest_changes, get_repo_details, get_repo_structure
 import asyncio
-
-llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0)
-
-
-# -------- ROUTER --------
-def router_node(state: State):
-    # first time → must clone
-    if not state.get("repo_path"):
-        state["next_node"] = "analyze_repo"
-        return state
-
-    # if repo cloned but no description yet
-    if not state.get("repo_summary"):
-        state["next_node"] = "analyze_repo"
-        return state
-
-    # ask LLM where to go
-    decision = llm.invoke(f"""
-User question: {state["user_question"]}
-
-Choose node:
-- analyze_repo
-- explain_code
-
-Reply only node name.
-""")
-
-    state["next_node"] = decision.content.strip()
-    return state
+import os
 
 
-# -------- GRAPH --------
 graph = StateGraph(State)
 
 graph.add_node("router", router_node)
@@ -64,6 +35,21 @@ async def main():
 
     state["username"] = input("GitHub username: ")
     state["repo_name"] = input("Repo name: ")
+
+    print("Checking if repo exists?...")
+    if(check_repo_exist(state['repo_name'])):
+        print("Repo exists.")
+        print("Pulling latest changes...")
+        pull_latest_changes(state['repo_name'])
+    else:
+        print("Repo not found.")
+        print("Cloning the repo...")
+        clone_repo(state['username'], state['repo_name'])
+        
+    state['repo_details'] = get_repo_details(state['username'], state['repo_name'])
+    state['repo_structure'] = get_repo_structure(state['repo_name'])
+
+    print("---ALL THINGS SET---")
 
     while True:
         q = input("\nAsk: ")

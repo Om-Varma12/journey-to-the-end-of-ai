@@ -8,13 +8,13 @@ class State(TypedDict, total=False):
     # repo data
     repo_path: Optional[str]
     repo_structure: Optional[Dict]
-    repo_description: Optional[str]
-    repo_language: Optional[str]
+    repo_details: dict
 
     # runtime
     user_question: str
     relevant_files: Optional[List[str]]
     repo_summary: Optional[str]
+    next_node: Optional[str]
 
     # output
     final_answer: Optional[str]
