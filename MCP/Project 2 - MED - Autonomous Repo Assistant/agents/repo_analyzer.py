@@ -1,52 +1,75 @@
+import asyncio
 from langchain_groq import ChatGroq
 from langchain_mcp_adapters.client import MultiServerMCPClient
-import asyncio
+from langchain_core.messages import ToolMessage, HumanMessage
 from dotenv import load_dotenv
+
 load_dotenv()
 
-llm = ChatGroq(model = "openai/gpt-oss-20b", temperature=0)
+llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0)
 
 client = MultiServerMCPClient({
     "repo": {
         "command": "python",
-        "args": ["mcp_server/server.py"],
+        "args": ["-u", "mcp_server/server.py"],
         "transport": "stdio",
     }
 })
 
-async def run(username: str, repo_name: str):
-    prompt = f"""
-        You are a senior GitHub repository analyst.
+with open('prompts/analyzer.txt', 'r') as f:
+    PROMPT = f.read()
 
-        Username: {username}
-        Repository: {repo_name}
-    """
+async def _run(question, username, repo_name, repoPath: str | None, repoStructure: dict | None):
+    prompt = (
+        PROMPT
+        .replace("{user_query}", question)
+        .replace("{username}", username)
+        .replace("{repo_name}", repo_name)
+    )
 
     tools = await client.get_tools()
+
     model_with_tools = llm.bind_tools(tools)
 
-    response = await model_with_tools.ainvoke(prompt)
+    # Use proper message object
+    messages = [HumanMessage(content=prompt)]
 
-    print("\nMODEL RESPONSE:")
-    print(response)
+    while True:
+        response = await model_with_tools.ainvoke(messages)
 
-    if response.tool_calls:
-        tool_call = response.tool_calls[0]
-        tool_name = tool_call["name"]
-        tool_args = tool_call["args"]
+        # If no tool calls → final answer
+        if not response.tool_calls:
+            print(response.content)
+            return response.content
 
-        print("\nTOOL CHOSEN:", tool_name)
-        print("ARGS:", tool_args)
+        # Append assistant message before executing tools
+        messages.append(response)
 
-        tool = {t.name: t for t in tools}[tool_name]
+        # Execute ALL tool calls
+        for tool_call in response.tool_calls:
+            tool_name = tool_call["name"]
+            tool_args = tool_call["args"]
 
-        tool_result = await tool.ainvoke(tool_args)
+            tool = {t.name: t for t in tools}[tool_name]
 
-        print("\n=== TOOL OUTPUT ===")
-        print(tool_result)
+            try:
+                tool_result = await tool.ainvoke(tool_args)
+            except Exception as e:
+                raise e
 
-    else:
-        print("\nNO TOOL CALLED")    
-        
-        
-asyncio.run(run("Om-Varma12", "CrackEM"))
+            # Convert result safely to string
+            tool_result_str = str(tool_result)
+
+            # Append tool response to conversation
+            messages.append(
+                ToolMessage(
+                    content=tool_result_str,
+                    tool_call_id=tool_call["id"]
+                )
+            )
+
+# async def run(user_query, username, repo_name, repoPath, rpeoStructure):
+#     return await _run(user_query, username, repo_name)
+
+if __name__ == "__main__":
+    print(asyncio.run(_run("What does this repo do?", "Om-Varma12", "PaperForge")))
