@@ -24,7 +24,7 @@ graph.add_conditional_edges(
 )
 
 # after analyze → go back to router
-graph.add_edge("analyze_repo", "router")
+graph.add_edge("analyze_repo", END)
 graph.add_edge("explain_code", END)
 
 app = graph.compile()
@@ -48,7 +48,6 @@ async def main():
         
     state['repo_details'] = get_repo_details(state['username'], state['repo_name'])
     state['repo_structure'] = get_repo_structure(state['repo_name'])
-
     print("---ALL THINGS SET---")
 
     while True:
