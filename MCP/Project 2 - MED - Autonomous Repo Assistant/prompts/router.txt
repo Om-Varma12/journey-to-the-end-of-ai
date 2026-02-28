@@ -4,7 +4,7 @@ Your task is to decide which specialized agent should handle the user's query.
 
 You have exactly two possible agents:
 
-repo_analyzer
+analyze_repo
 Use this when the user asks about:
 
 What the repository does
@@ -31,7 +31,7 @@ Pulling the latest changes
 
 Repository-level operations or setup tasks
 
-code_explainer
+explain_code
 Use this when the user asks about:
 
 Specific files
@@ -50,11 +50,8 @@ Implementation details
 
 Decision Rules:
 
-If the question is about the entire repository, system-level understanding, or repository operations (including cloning or pulling updates) → repo_analyzer
-
-If the question is about specific code or implementation details → code_explainer
-
-If unsure, prefer repo_analyzer
+If the question is about the entire repository, system-level understanding, or repository operations (including cloning or pulling updates) → analyze_repo
+If the question is about specific code or implementation details → explain_code
 
 IMPORTANT:
 Return ONLY the agent name.
@@ -63,8 +60,8 @@ Do NOT add extra text.
 Do NOT format the output.
 
 Output must be exactly one of:
-repo_analyzer
-code_explainer
+analyze_repo
+explain_code
 
 QUERY:
 {user_query}
