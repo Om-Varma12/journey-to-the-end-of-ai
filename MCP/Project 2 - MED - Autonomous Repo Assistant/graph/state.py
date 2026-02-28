@@ -1,24 +1,21 @@
-from typing import TypedDict, Optional, Dict, List
+from typing import TypedDict, Optional, List, Dict
 
 class State(TypedDict, total=False):
-    repo_path: str
+    # repo identity
     username: str
     repo_name: str
 
-    file_map: Dict                 # renamed from repo_structure
+    # repo data
+    repo_path: Optional[str]
+    repo_structure: Optional[Dict]
+    repo_description: Optional[str]
+    repo_language: Optional[str]
 
-    # repo knowledge
-    repo_summary: str
-    dependencies: List[str]
-    entry_points: List[str]
-    language: str
+    # runtime
+    user_question: str
+    relevant_files: Optional[List[str]]
+    repo_summary: Optional[str]
 
-    # per-file memory
-    file_notes: Dict[str, Dict]    # summaries of important files
-
-    # runtime interaction
-    last_user_query: str
-    target_file: str
-
-    # metadata
-    repo_details: Dict
+    # output
+    final_answer: Optional[str]
+    next_node: Optional[str]
