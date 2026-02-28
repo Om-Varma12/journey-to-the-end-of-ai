@@ -1,24 +1,24 @@
 from .state import State
-from agents import repo_analyzer, code_explainer
+from agents import repo_analyzer, code_explainer, router
 
 
 async def analyze_repo_node(state: State):
+    print("repo analyzer came")
     result = await repo_analyzer.run(
-        query = state['user_question'],
-        username=state["username"],
-        repoName=state["repo_name"],
-        repoPath = state['repo_path'],
+        user_query = state['user_question'],
+        repo_name = state['repo_name'],
+        repo_details = state["repo_details"],
         repoStructure = state['repo_structure']
     )
-
-
+    return {
+        "final_answer": result
+    }
+    
 def explain_code_node(state: State):
-    answer = code_explainer.run(
-        question=state["user_question"],
-        files=state.get("relevant_files", []),
-        repo_summary=state.get("repo_summary", ""),
-        repo_name=state["repo_name"]
-    )
+    print("Code agent invoked")
 
-    state["final_answer"] = answer
-    return state
+async def router_node(state: State):
+    result = await router.run(state['user_question'])
+    return {
+        "next_node": result
+    }
