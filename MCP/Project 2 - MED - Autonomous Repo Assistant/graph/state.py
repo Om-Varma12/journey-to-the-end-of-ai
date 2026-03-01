@@ -14,8 +14,10 @@ class State(TypedDict, total=False):
     user_question: str
     relevant_files: Optional[List[str]]
     repo_summary: Optional[str]
+
+    # routing
     next_node: Optional[str]
+    sub_next_node: Optional[str]  
 
     # output
     final_answer: Optional[str]
-    next_node: Optional[str]
