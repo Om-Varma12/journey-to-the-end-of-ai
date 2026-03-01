@@ -21,3 +21,7 @@ class State(TypedDict, total=False):
 
     # output
     final_answer: Optional[str]
+    
+    # file related state
+    current_files: Optional[List[str]]
+    file_cache: Optional[Dict[str, str]]
