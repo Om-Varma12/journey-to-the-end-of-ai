@@ -1,3 +1,103 @@
-repo_analyzer m repoPath and repoStructure dalyo hu
-now make changes so that, agar repo already cloned h, toh bhi what does this repo do, must show the response using the
-repo_structure or by using the get_repo_information tool
+🎯 PHASE 2 ROADMAP (What To Do Now)
+
+We’ll break this into 4 layers:
+
+Agent Specialization
+
+Router Intelligence
+
+Capability Registry
+
+Stability & Clean Architecture
+
+✅ 1️⃣ Agent Specialization (Highest Priority)
+🔲 Create Separate Agents:
+
+repo_overview_agent
+
+architecture_agent
+
+structure_agent
+
+(optional) review_agent
+
+Each should:
+
+Have its own prompt file
+
+Have a very narrow responsibility
+
+Return clearly distinct output formats
+
+Goal:
+No overlap in responsibilities.
+
+🔲 Rewrite Prompts To Be Strict
+
+Example:
+
+Overview agent:
+
+Only high-level purpose
+
+No execution flow
+
+No deep architecture
+
+Architecture agent:
+
+No general summary
+
+Only system design
+
+Explicit component interactions
+
+Explicit data flow
+
+Make outputs feel different.
+
+✅ 2️⃣ Implement Sub-Router (Inside Repo Analyzer)
+🔲 Create repo_analyzer_router
+
+It should:
+
+Read user query
+
+Match against capability descriptions
+
+Route to correct sub-agent
+
+Start with keyword-based routing.
+Later upgrade to LLM-based routing.
+
+🔲 Add Agent Registry
+
+Create a simple metadata structure:
+
+Agent name
+
+Responsibility
+
+Tool access list
+
+Router reads this metadata only.
+No internal coupling.
+
+✅ 3️⃣ Clean Up Graph Structure
+
+Update LangGraph to:
+
+Main Router
+ ├── Code Explainer
+ └── Repo Analyzer Router
+        ├── Overview
+        ├── Architecture
+        ├── Structure
+
+Make sure:
+
+State remains minimal
+
+Each node only modifies final_answer
+
+No unnecessary state pollution
