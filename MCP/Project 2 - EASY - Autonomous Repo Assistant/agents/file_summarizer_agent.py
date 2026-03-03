@@ -11,7 +11,7 @@ async def _run(file_name: str, file_content: str):
     prompt = (
         PROMPT
         .replace("{file_name}", file_name)
-        .replace("{file_content}", file_content)
+        .replace("{file_content}", str(file_content))
     )
 
     response = await llm.ainvoke(prompt)
