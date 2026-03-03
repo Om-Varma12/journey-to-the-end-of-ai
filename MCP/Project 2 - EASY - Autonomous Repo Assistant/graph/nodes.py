@@ -5,12 +5,8 @@ from agents import (
     overview_agent,
     arch_agent,
     data_flow_agent,
-    file_summarizer_agent, 
     code_explainer,
-    file_resolver_agent
 )
-from services.file_service import read_file_content
-import ast
 
 
 async def router_node(state: State):
@@ -67,63 +63,11 @@ async def dataflow_node(state: State):
 async def explain_code_node(state: State):
     print("code explainer invoked")
 
+    current_file = state.get("current_file")  # why get? in nodes.py we have it as optional, and for first invocation, the key won't exist and .get() return None if the key is not found
+    file_cache = state.get("file_cache")
     question = state["user_question"]
     repo_name = state["repo_name"]
     repo_structure = state["repo_structure"]
 
-    # initialize cache
-    if "file_cache" not in state or state["file_cache"] is None:
-        state["file_cache"] = {}
-
-    # initialize current files
-    if "current_files" not in state:
-        state["current_files"] = None
-        
-    resolved = await file_resolver_agent.run(
-        user_query=question,
-        repo_structure=repo_structure,
-        current_files=state["current_files"],
-    )
-
-    if resolved == "NONE":
-        return {"final_answer": "Could not determine which file you are referring to."}
-
-    try:
-        resolved_files = ast.literal_eval(resolved)
-    except:
-        return {"final_answer": "File resolution failed."}
-
-    if not resolved_files:
-        return {"final_answer": "No matching files found."}
-
-    state["current_files"] = resolved_files
-
-    explanations = []
-
-    for file_path in resolved_files:
-
-        if file_path not in state["file_cache"]:
-            print(f"summarizing {file_path}...")
-
-            content = read_file_content(repo_name, file_path)
-
-            summary = await file_summarizer_agent.run(
-                file_name=file_path,
-                file_content=content,
-            )
-
-            state["file_cache"][file_path] = summary
-
-        file_summary = state["file_cache"][file_path]
-
-        explanation = await code_explainer.run(
-            user_query=question,
-            file_name=file_path,
-            file_summary=file_summary,
-        )
-
-        explanations.append(f"### {file_path}\n\n{explanation}")
-
-    final_output = "\n\n".join(explanations)
-
-    return {"final_answer": final_output}
+    response = await code_explainer.run(current_file, file_cache, question, repo_name, repo_structure)
+    return {"final_answer": response}

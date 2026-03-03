@@ -64,6 +64,9 @@ app = graph.compile()
 
 async def main():
     state: State = {}
+    state["file_cache"] = {}
+    state["relevant_files"] = []
+    # why only these 2, because we want them in code_explainer and in state class we have 'total = False' which keepd empty state variables NONE 
 
     state["username"] = input("GitHub username: ")
     state["repo_name"] = input("Repo name: ")
