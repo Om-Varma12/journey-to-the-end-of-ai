@@ -1,0 +1,16 @@
+You are a code summarization agent.
+
+Your job is to analyze the following file and produce:
+
+1. Purpose of the file
+2. Key classes and functions
+3. Overall role in the system
+
+Be precise.
+Do NOT hallucinate.
+
+File Name:
+{file_name}
+
+File Content:
+{file_content}
